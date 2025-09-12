@@ -1,8 +1,9 @@
+import logging
+from typing import List, Optional, Sequence, Tuple, Union
+
 import torch
 import torch.nn as nn
 import zuko
-from typing import Optional, Sequence, Tuple, Union, List
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class BaseGWCalFlow(nn.Module):
     cal_hidden_features : Sequence[int], optional
         Hidden layer sizes for calibration network, by default (128,).
     """
+
     def __init__(
         self,
         gw_dim: int,
@@ -32,7 +34,7 @@ class BaseGWCalFlow(nn.Module):
         context_dim: Optional[int] = None,
         hidden_features: Sequence[int] = (128, 128),
         cal_hidden_features: Sequence[int] = (128,),
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__()
 
@@ -46,7 +48,7 @@ class BaseGWCalFlow(nn.Module):
             features=gw_dim,
             context=context_dim or 0,
             hidden_features=list(hidden_features),
-            **kwargs
+            **kwargs,
         )
 
         # Calibration network
@@ -62,9 +64,7 @@ class BaseGWCalFlow(nn.Module):
         nn.init.constant_(self.log_scale_head.bias, -2.0)
 
     def _cal_params(
-        self,
-        gw: torch.Tensor,
-        context: Optional[torch.Tensor] = None
+        self, gw: torch.Tensor, context: Optional[torch.Tensor] = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Compute location and scale for calibration parameters given GW and optional context.
@@ -97,8 +97,7 @@ class BaseGWCalFlow(nn.Module):
         return loc, scale
 
     def forward(
-        self,
-        context: Optional[torch.Tensor] = None
+        self, context: Optional[torch.Tensor] = None
     ) -> "BaseGWCalFlow.JointDistribution":
         """
         Returns the joint distribution for GW and calibration parameters.
@@ -126,10 +125,9 @@ class BaseGWCalFlow(nn.Module):
         context : Optional[torch.Tensor]
             Context tensor.
         """
+
         def __init__(
-            self,
-            parent: "BaseGWCalFlow",
-            context: Optional[torch.Tensor]
+            self, parent: "BaseGWCalFlow", context: Optional[torch.Tensor]
         ) -> None:
             self.parent = parent
             self.context = context
@@ -140,8 +138,7 @@ class BaseGWCalFlow(nn.Module):
             )
 
         def sample(
-            self,
-            sample_shape: torch.Size = torch.Size()
+            self, sample_shape: torch.Size = torch.Size()
         ) -> torch.Tensor:
             """
             Sample from the joint distribution.
@@ -168,10 +165,7 @@ class BaseGWCalFlow(nn.Module):
             cal = zuko.distributions.DiagNormal(loc, scale, ndims=1).rsample()
             return self._assemble(gw, cal)
 
-        def log_prob(
-            self,
-            x: torch.Tensor
-        ) -> torch.Tensor:
+        def log_prob(self, x: torch.Tensor) -> torch.Tensor:
             """
             Compute log-probability of a sample.
 
@@ -194,8 +188,7 @@ class BaseGWCalFlow(nn.Module):
             return logp_gw + logp_cal
 
         def _extract(
-            self,
-            x: torch.Tensor
+            self, x: torch.Tensor
         ) -> Tuple[torch.Tensor, torch.Tensor]:
             """
             Extract GW and calibration parameters from input tensor.
@@ -215,9 +208,7 @@ class BaseGWCalFlow(nn.Module):
             raise NotImplementedError
 
         def _assemble(
-            self,
-            gw: torch.Tensor,
-            cal: torch.Tensor
+            self, gw: torch.Tensor, cal: torch.Tensor
         ) -> torch.Tensor:
             """
             Assemble GW and calibration parameters into a single tensor.
@@ -254,6 +245,7 @@ class ContiguousGWCalFlow(BaseGWCalFlow):
     cal_hidden_features : Sequence[int], optional
         Hidden layer sizes for calibration network, by default (128,).
     """
+
     def __init__(
         self,
         gw_dim: int,
@@ -261,17 +253,24 @@ class ContiguousGWCalFlow(BaseGWCalFlow):
         context_dim: Optional[int] = None,
         hidden_features: Sequence[int] = (128, 128),
         cal_hidden_features: Sequence[int] = (128,),
-        **kwargs
+        **kwargs,
     ) -> None:
-        super().__init__(gw_dim=gw_dim, cal_dim=cal_dim, context_dim=context_dim, hidden_features=hidden_features, cal_hidden_features=cal_hidden_features, **kwargs)
+        super().__init__(
+            gw_dim=gw_dim,
+            cal_dim=cal_dim,
+            context_dim=context_dim,
+            hidden_features=hidden_features,
+            cal_hidden_features=cal_hidden_features,
+            **kwargs,
+        )
 
     class JointDistribution(BaseGWCalFlow.JointDistribution):
         """
         Joint distribution for contiguous GW and calibration parameters.
         """
+
         def _extract(
-            self,
-            x: torch.Tensor
+            self, x: torch.Tensor
         ) -> Tuple[torch.Tensor, torch.Tensor]:
             """
             Extract GW and calibration parameters from contiguous input tensor.
@@ -293,9 +292,7 @@ class ContiguousGWCalFlow(BaseGWCalFlow):
             return gw, cal
 
         def _assemble(
-            self,
-            gw: torch.Tensor,
-            cal: torch.Tensor
+            self, gw: torch.Tensor, cal: torch.Tensor
         ) -> torch.Tensor:
             """
             Assemble GW and calibration parameters into a contiguous tensor.
@@ -332,6 +329,7 @@ class IndexedGWCalFlow(BaseGWCalFlow):
     cal_hidden_features : Sequence[int], optional
         Hidden layer sizes for calibration network, by default (128,).
     """
+
     def __init__(
         self,
         gw_idx: Sequence[int],
@@ -339,11 +337,18 @@ class IndexedGWCalFlow(BaseGWCalFlow):
         context_dim: Optional[int] = None,
         hidden_features: Sequence[int] = (128, 128),
         cal_hidden_features: Sequence[int] = (128,),
-        **kwargs
+        **kwargs,
     ) -> None:
         gw_dim = len(gw_idx)
         cal_dim = len(cal_idx)
-        super().__init__(gw_dim=gw_dim, cal_dim=cal_dim, context_dim=context_dim, hidden_features=hidden_features, cal_hidden_features=cal_hidden_features, **kwargs)
+        super().__init__(
+            gw_dim=gw_dim,
+            cal_dim=cal_dim,
+            context_dim=context_dim,
+            hidden_features=hidden_features,
+            cal_hidden_features=cal_hidden_features,
+            **kwargs,
+        )
         self.gw_idx = torch.tensor(gw_idx, dtype=torch.long)
         self.cal_idx = torch.tensor(cal_idx, dtype=torch.long)
 
@@ -351,9 +356,9 @@ class IndexedGWCalFlow(BaseGWCalFlow):
         """
         Joint distribution for indexed GW and calibration parameters.
         """
+
         def _extract(
-            self,
-            x: torch.Tensor
+            self, x: torch.Tensor
         ) -> Tuple[torch.Tensor, torch.Tensor]:
             """
             Extract GW and calibration parameters from indexed input tensor.
@@ -375,9 +380,7 @@ class IndexedGWCalFlow(BaseGWCalFlow):
             return gw, cal
 
         def _assemble(
-            self,
-            gw: torch.Tensor,
-            cal: torch.Tensor
+            self, gw: torch.Tensor, cal: torch.Tensor
         ) -> torch.Tensor:
             """
             Assemble GW and calibration parameters into a tensor using indices.
@@ -394,7 +397,7 @@ class IndexedGWCalFlow(BaseGWCalFlow):
             torch.Tensor
                 Joint tensor.
             """
-            total_dim = (gw.shape[-1] + cal.shape[-1])
+            total_dim = gw.shape[-1] + cal.shape[-1]
             full_sample = torch.zeros(
                 *gw.shape[:-1], total_dim, device=gw.device
             )
@@ -412,6 +415,7 @@ class GWCalFlow:
     2. By parameter dimensions: provide `gw_dim` and `cal_dim` integers.
     3. By parameter names: provide `parameters` list and `calib_regex` string.
     """
+
     def __new__(
         cls,
         *,
@@ -424,7 +428,7 @@ class GWCalFlow:
         context_dim: Optional[int] = None,
         hidden_features: Sequence[int] = (128, 128),
         cal_hidden_features: Sequence[int] = (128,),
-        **kwargs
+        **kwargs,
     ) -> Union[ContiguousGWCalFlow, IndexedGWCalFlow]:
         """
         Factory method to construct a GWCalFlow using indices, dimensions, or parameter names.
@@ -464,14 +468,16 @@ class GWCalFlow:
                 if re.search(calib_regex, p)
             ]
             gw_idx = [i for i in range(len(parameters)) if i not in cal_idx]
-            print(f"Identified {len(gw_idx)} GW parameters and {len(cal_idx)} calibration parameters.")
+            print(
+                f"Identified {len(gw_idx)} GW parameters and {len(cal_idx)} calibration parameters."
+            )
             return GWCalFlow(
                 gw_idx=gw_idx,
                 cal_idx=cal_idx,
                 context_dim=context_dim,
                 hidden_features=hidden_features,
                 cal_hidden_features=cal_hidden_features,
-                **kwargs
+                **kwargs,
             )
         elif gw_dim is not None and cal_dim is not None:
             return ContiguousGWCalFlow(
@@ -480,7 +486,7 @@ class GWCalFlow:
                 context_dim=context_dim,
                 hidden_features=hidden_features,
                 cal_hidden_features=cal_hidden_features,
-                **kwargs
+                **kwargs,
             )
         elif gw_idx is not None and cal_idx is not None:
             return IndexedGWCalFlow(
@@ -489,7 +495,7 @@ class GWCalFlow:
                 context_dim=context_dim,
                 hidden_features=hidden_features,
                 cal_hidden_features=cal_hidden_features,
-                **kwargs
+                **kwargs,
             )
         else:
             raise ValueError(

@@ -1,6 +1,7 @@
 """
 gwflow: Normalizing flows for gravitational-wave inference
 """
+
 import logging
 from importlib.metadata import PackageNotFoundError, version
 

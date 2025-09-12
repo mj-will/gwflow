@@ -1,5 +1,5 @@
-import torch
 import pytest
+import torch
 
 from gwflow.flow import GWCalFlow
 
@@ -10,7 +10,19 @@ from gwflow.flow import GWCalFlow
     [
         {"gw_dim": 5, "cal_dim": 3},
         {"gw_idx": [0, 2, 4, 6, 7], "cal_idx": [1, 3, 5]},
-        {"parameters": ["m1", "m2", "dist", "iota", "psi", "calib_1", "calib_2", "calib_3"], "calib_regex": "calib_.*"},
+        {
+            "parameters": [
+                "m1",
+                "m2",
+                "dist",
+                "iota",
+                "psi",
+                "calib_1",
+                "calib_2",
+                "calib_3",
+            ],
+            "calib_regex": "calib_.*",
+        },
     ],
 )
 def test_calflow(inputs, context_dim):
