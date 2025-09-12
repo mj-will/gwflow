@@ -5,6 +5,7 @@ from gwflow.flow import GWCalFlow
 
 
 @pytest.mark.parametrize("context_dim", [None, 20])
+@pytest.mark.parametrize("calibration_model", ["nn", "gaussian"])
 @pytest.mark.parametrize(
     "inputs",
     [
@@ -25,9 +26,10 @@ from gwflow.flow import GWCalFlow
         },
     ],
 )
-def test_calflow(inputs, context_dim):
+def test_calflow(inputs, context_dim, calibration_model):
     flow = GWCalFlow(
         context_dim=context_dim,
+        calibration_model=calibration_model,
         **inputs,
     )
 
@@ -48,7 +50,7 @@ def test_calflow(inputs, context_dim):
         dist = flow()
 
     # --- sampling ---
-    samples = dist.sample((batch_size,))
+    samples = dist.rsample((batch_size,))
     if context_dim:
         assert samples.shape == (batch_size, context_size, gw_dim + cal_dim)
     else:
@@ -59,6 +61,16 @@ def test_calflow(inputs, context_dim):
     if context_dim:
         assert logp.shape == (batch_size, context_size)
     else:
+        assert logp.shape == (batch_size,)
+    assert torch.isfinite(logp).all()
+
+    # --- sample + log prob ---
+    samples, logp = dist.rsample_and_log_prob((batch_size,))
+    if context_dim:
+        assert samples.shape == (batch_size, context_size, gw_dim + cal_dim)
+        assert logp.shape == (batch_size, context_size)
+    else:
+        assert samples.shape == (batch_size, gw_dim + cal_dim)
         assert logp.shape == (batch_size,)
     assert torch.isfinite(logp).all()
 
