@@ -49,7 +49,10 @@ class BaseGWCalFlow(nn.Module):
         self._configure_cal_params(gw_dim, cal_dim, context_dim, **cal_kwargs)
 
         if isinstance(flow_class, str):
-            FlowClass = getattr(zuko.flows, flow_class)
+            try:
+                FlowClass = getattr(zuko.flows, flow_class)
+            except AttributeError:
+                raise ValueError(f"Unknown flow_class: {flow_class}")
         else:
             FlowClass = flow_class
 
