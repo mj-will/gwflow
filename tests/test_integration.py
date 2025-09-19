@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from gwflow.flow import GWCalFlow
+from gwflow.gwflow import GWCalFlow
 
 
 @pytest.mark.parametrize("context_dim", [None, 20])
