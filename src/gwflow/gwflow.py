@@ -130,7 +130,7 @@ class BaseGWCalFlow(nn.Module):
             torch.Tensor
                 Sampled joint vector.
             """
-            gw = self.dist_gw.rsample(sample_shape)
+            gw = self.dist_gw.sample(sample_shape)
 
             context = self.context
             if context is not None:
@@ -141,6 +141,25 @@ class BaseGWCalFlow(nn.Module):
             loc, scale = self.parent._cal_params(gw, context)
             cal = zuko.distributions.DiagNormal(loc, scale, ndims=1).rsample()
             return self._assemble(gw, cal)
+
+        def sample(
+            self, sample_shape: torch.Size = torch.Size()
+        ) -> torch.Tensor:
+            """
+            Sample from the joint distribution.
+
+            Parameters
+            ----------
+            sample_shape : torch.Size, optional
+                Shape of samples, by default torch.Size().
+
+            Returns
+            -------
+            torch.Tensor
+                Sampled joint vector.
+            """
+            with torch.no_grad():
+                return self.rsample(sample_shape)
 
         def log_prob(self, x: torch.Tensor) -> torch.Tensor:
             """
