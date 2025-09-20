@@ -15,8 +15,6 @@ pip install git+git@github.com:mj-will/gwflow.git
 
 ## Flows
 
-
-
 ### `GWCalFlow`
 
 This flow is designed for use in analyses where there are large number of
@@ -102,3 +100,8 @@ For more details, see the [`zuko` documentation](https://zuko.readthedocs.io/sta
 
 **Note:** since the transform only applies to a subset of the parameter space,
 the flow does not expose this attribute.
+
+
+## Citation
+
+If you use `gwflow` in your work, please cite our DOI (to be added) and [`zuko`](https://github.com/probabilists/zuko).
