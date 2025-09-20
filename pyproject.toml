@@ -24,6 +24,11 @@ dynamic = ["version"]
 [project.urls]
 Homepage = "https://github.com/mj-will/gwflow"
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
 [tool.setuptools_scm]
 
 [tool.ruff]
