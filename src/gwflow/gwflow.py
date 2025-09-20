@@ -146,7 +146,7 @@ class BaseGWCalFlow(nn.Module):
             self, sample_shape: torch.Size = torch.Size()
         ) -> torch.Tensor:
             """
-            Sample from the joint distribution.
+            Sample from the joint distribution without gradients.
 
             Parameters
             ----------
