@@ -50,7 +50,7 @@ def test_calflow(inputs, context_dim, calibration_model):
         dist = flow()
 
     # --- sampling ---
-    samples = dist.rsample((batch_size,))
+    samples = dist.sample((batch_size,))
     if context_dim:
         assert samples.shape == (batch_size, context_size, gw_dim + cal_dim)
     else:
