@@ -516,7 +516,10 @@ class IndexedGWCalFlow(BaseGWCalFlow):
             """
             total_dim = gw.shape[-1] + cal.shape[-1]
             full_sample = torch.zeros(
-                *gw.shape[:-1], total_dim, device=gw.device, dtype=gw.dtype,
+                *gw.shape[:-1],
+                total_dim,
+                device=gw.device,
+                dtype=gw.dtype,
             )
             full_sample[..., self.parent.gw_idx] = gw
             full_sample[..., self.parent.cal_idx] = cal
